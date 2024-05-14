@@ -11,12 +11,13 @@ RUN apt-get update \
 RUN addgroup --system ${USER} --gid 1000 && adduser -u 1000 --gid 1000 --system ${USER} 
 RUN usermod -aG sudo ${USER}
 
-
-COPY ./backend/ux_analyzer/* ${HOME}
+RUN git clone https://github.com/jcgardey/ux-analyzer-api.git
+WORKDIR ${HOME}/ux-analyzer-api/src
 
 RUN pip install -r requirements.txt
 RUN chown -R ${USER}:${USER} /usr/src/app
+RUN chmod 777 start.sh
 USER ${USER} 
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"] 
+CMD ["./start.sh"] 
