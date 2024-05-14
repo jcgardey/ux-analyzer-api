@@ -1,0 +1,40 @@
+version: '3'
+services:
+  
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    tty: true
+    environment:
+      SERVICE_NAME: backend
+      SERVICE_TAGS: dev
+      DB_NAME: ux-analyzer
+      DB_USER: ux-analyzer
+      DB_PASS: ux-analyzer
+      DB_HOST: ux-analyzer-db
+    working_dir: /usr/src/app
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./backend/ux_analyzer:/usr/src/app
+  db:
+    image: mariadb:11.0
+    container_name: ux-analyzer-db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_DATABASE: ux-analyzer
+      MYSQL_ROOT_PASSWORD: ux-analyzer
+      MYSQL_USER: ux-analyzer
+      MYSQL_PASSWORD: ux-analyzer
+      SERVICE_TAGS: dev
+    volumes:
+      - database:/var/lib/mysql
+volumes:
+  database:
+    driver: local
