@@ -1,24 +1,23 @@
 version: '3'
 services:
   
-  backend:
+  api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: backend
+    container_name: ux-analyzer-api
     tty: true
     environment:
-      SERVICE_NAME: backend
+      SERVICE_NAME: ux-analyzer-api
       SERVICE_TAGS: dev
       DB_NAME: ux-analyzer
       DB_USER: ux-analyzer
       DB_PASS: ux-analyzer
       DB_HOST: ux-analyzer-db
-    working_dir: /usr/src/app
     ports:
       - "8002:8000"
     volumes:
-      - ./backend/ux_analyzer:/usr/src/app
+      - ./src:/usr/src/app/ux-analyzer-api/src
   db:
     image: mariadb:11.0
     container_name: ux-analyzer-db

@@ -12,9 +12,9 @@ RUN addgroup --system ${USER} --gid 1000 && adduser -u 1000 --gid 1000 --system 
 RUN usermod -aG sudo ${USER}
 
 RUN git clone https://github.com/jcgardey/ux-analyzer-api.git
-WORKDIR ${HOME}/ux-analyzer-api/src
+WORKDIR ${HOME}/ux-analyzer-api
 
-RUN pip install -r requirements.txt
+RUN pip install -r src/requirements.txt
 RUN chown -R ${USER}:${USER} /usr/src/app
 RUN chmod 777 start.sh
 USER ${USER} 
