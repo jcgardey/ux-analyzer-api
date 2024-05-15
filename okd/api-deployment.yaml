@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ux-analyzer-api
+  name: ux-analyzer-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+     app: ux-analyzer-api        
+  template:
+    metadata:            
+      labels:
+        app: ux-analyzer-api        
+    spec:
+      containers:
+        - name: ux-analyzer-api
+          image: jcgardey/ux-analyzer-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            # Define the environment variable
+            - name: DB_NAME 
+              value: "ux-analyzer"  
+            - name: DB_PASS
+              value: "ux-analyzer"  
+            - name: DB_USER
+              value: "ux-analyzer"  
+            - name: DB_HOST
+              value: "ux-analyzer-db"  

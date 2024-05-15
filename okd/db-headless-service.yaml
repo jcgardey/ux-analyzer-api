@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:  
+  name: ux-analyzer-db
+spec:
+  ports:    
+    - name: ux-analyzer-db
+      protocol: TCP
+      port: 3306
+      targetPort: 3306    
+  selector:
+    app: ux-analyzer-db
+  clusterIP: None  
+  type: ClusterIP
+  sessionAffinity: None

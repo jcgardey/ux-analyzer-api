@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ux-analyzer-db  
+spec:
+  podManagementPolicy: Parallel
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: ux-analyzer-db
+  serviceName: ux-analyzer-db
+  template:
+    metadata:      
+      labels:
+        app: ux-analyzer-db
+    spec:
+      containers:
+        - name: ux-analyzer-db
+          image: mariadb:11.0
+          imagePullPolicy: IfNotPresent          
+          ports:
+            - containerPort: 3306
+              protocol: TCP   
+          env:
+            - name: MYSQL_USER
+              value: "ux-analyzer"  
+            - name: MYSQL_PASSWORD
+              value: "ux-analyzer"  
+            - name: MYSQL_ROOT_PASSWORD
+              value: "ux-analyzer"  
+            - name: MYSQL_DATABASE
+              value: "ux-analyzer"  
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: ux-analyzer-db
+            - mountPath: /etc/mysql/conf.d/
+              name: config-volume
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mariadb-config
+  volumeClaimTemplates:
+    - metadata:        
+        name: ux-analyzer-db
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
