@@ -3,8 +3,9 @@ from django.contrib.auth import authenticate, login
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import LoginUserSerializer
+from .serializers import LoginUserSerializer, SignUpUserSerializer
 from rest_framework.permissions import IsAuthenticated
+from users.models import User, UserProfile
 
 class LoginAPI(APIView):
     
@@ -29,6 +30,12 @@ class GetLoggedUserAPI(APIView):
 class SignUpUserAPI(APIView):
 
     def post(self, request):
-        pass
+        serializer = SignUpUserSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        user = User.objects.create_user(**serializer.validated_data)
+        user.profile = UserProfile()
+        user.profile.save()
+        return Response(LoginUserSerializer(user).data, status=status.HTTP_200_OK)
         
         
