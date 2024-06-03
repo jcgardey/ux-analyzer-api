@@ -13,7 +13,7 @@ class WidgetSerializer(serializers.ModelSerializer):
         fields = ('id','widget_type', 'url', 'label', 'xpath', 'weight', 'user_interaction_effort')
     
     def get_user_interaction_effort(self, widget):
-        return round(widget.get_user_interaction_effort(), 1)
+        return round(widget.get_user_interaction_effort(), 1) if widget.get_user_interaction_effort() else None
 
 class WidgetLogSerializer(serializers.ModelSerializer):
     widget = WidgetSerializer()

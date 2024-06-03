@@ -41,10 +41,11 @@ class UserSession(models.Model):
     session_id = models.CharField(max_length=50)
     
     def get_user_interaction_effort(self):
-        if self.widget_logs.count() == 0:
+        valid_logs = list(filter(lambda w: w.is_valid(), self.widget_logs.all()))
+        if len(valid_logs) == 0:
             return None
-        predictions = np.array([ widget_log.get_user_interaction_effort() for widget_log in self.widget_logs.all() ])
-        widget_weights = list(map(lambda widget_log: widget_log.widget.weight, self.widget_logs.all()))
+        predictions = np.array([ widget_log.get_user_interaction_effort() for widget_log in valid_logs ])
+        widget_weights = list(map(lambda widget_log: widget_log.widget.weight, valid_logs))
         return np.average(predictions.reshape(-1), weights=widget_weights)
     
 class Widget(models.Model):
@@ -64,9 +65,10 @@ class Widget(models.Model):
     weight = models.FloatField(default=1)
 
     def get_user_interaction_effort(self):
-        if self.logs.count() == 0:
+        valid_logs = list(filter(lambda w: w.is_valid(), self.logs.all()))
+        if len(valid_logs) == 0:
             return None
-        predictions = np.array([ widget_log.get_user_interaction_effort() for widget_log in self.logs.all() ])
+        predictions = np.array([ widget_log.get_user_interaction_effort() for widget_log in valid_logs])
         return np.mean(predictions)
 
 class WidgetLog(models.Model):
@@ -74,6 +76,13 @@ class WidgetLog(models.Model):
     user_session = models.ForeignKey(UserSession, on_delete=models.CASCADE, related_name='widget_logs')
     micro_measures = models.JSONField()
     widget = models.ForeignKey(Widget, on_delete=models.CASCADE, related_name='logs', null=True)
+
+    def is_valid(self):
+        for value in grabbers[self.widget.widget_type].get_measures_for_prediction(self.micro_measures):
+            if value is None or value == 'NaN':
+                return False
+        return True
+
 
     def get_user_interaction_effort(self):
         prediction_model = prediction_models.get_widget_model(self.widget.widget_type)
