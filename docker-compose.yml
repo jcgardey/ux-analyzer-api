@@ -15,7 +15,7 @@ services:
       DB_PASS: ux-analyzer
       DB_HOST: ux-analyzer-db
     ports:
-      - "8002:8000"
+      - "8003:8000"
     volumes:
       - ./src:/usr/src/app/ux-analyzer-api/src
   db:
