@@ -76,18 +76,24 @@ class WidgetLog(models.Model):
     user_session = models.ForeignKey(UserSession, on_delete=models.CASCADE, related_name='widget_logs')
     micro_measures = models.JSONField()
     widget = models.ForeignKey(Widget, on_delete=models.CASCADE, related_name='logs', null=True)
+    interaction_effort = models.DecimalFieldField(max_digits=2, decimal_places=2, null=True)
 
     def is_valid(self):
+        if self.interaction_effort is None:
+            return False
         for value in grabbers[self.widget.widget_type].get_measures_for_prediction(self.micro_measures):
             if value is None or value == 'NaN':
                 return False
         return True
 
 
-    def get_user_interaction_effort(self):
+    def refresh_user_interaction_effort(self):
         prediction_model = prediction_models.get_widget_model(self.widget.widget_type)
         micro_measures_normalized = prediction_model.scaler.transform(  np.array(grabbers[self.widget.widget_type].get_measures_for_prediction(self.micro_measures)).reshape(1,-1) )
-        return prediction_model.predict( micro_measures_normalized )
+        self.interaction_effort = prediction_model.predict( micro_measures_normalized )
+    
+    def get_user_interaction_effort(self):
+        return self.interaction_effort
 
 
 

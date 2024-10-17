@@ -19,7 +19,7 @@ class WidgetLogSerializer(serializers.ModelSerializer):
     widget = WidgetSerializer()
     class Meta:
         model = WidgetLog
-        fields = ('micro_measures', 'widget')
+        fields = ('micro_measures', 'widget', 'interaction_effort')
 
 class UserSessionSerializer(serializers.ModelSerializer):
     widget_logs = WidgetLogSerializer(many=True)
