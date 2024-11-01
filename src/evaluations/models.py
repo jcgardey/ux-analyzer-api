@@ -76,7 +76,7 @@ class WidgetLog(models.Model):
     user_session = models.ForeignKey(UserSession, on_delete=models.CASCADE, related_name='widget_logs')
     micro_measures = models.JSONField()
     widget = models.ForeignKey(Widget, on_delete=models.CASCADE, related_name='logs', null=True)
-    interaction_effort = models.DecimalFieldField(max_digits=2, decimal_places=2, null=True)
+    interaction_effort = models.DecimalField(max_digits=2, decimal_places=2, null=True)
 
     def is_valid(self):
         if self.interaction_effort is None:
