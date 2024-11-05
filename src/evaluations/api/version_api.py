@@ -59,4 +59,11 @@ class UpdateWidgetsSettingsAPI(APIView):
             target_widget.label = widget_data['label']
             target_widget.save()
         return Response({'status': 'ok'}, status=status.HTTP_200_OK)
-        
+
+class RefreshUserInteractionEffortAPI(APIView):
+    #permission_classes = [IsAuthenticated]
+
+    def post(self, request, id):
+        version = Version.objects.get(pk=id)
+        version.calculate_user_interaction_effort()
+        return Response(VersionSerializer(version).data)     

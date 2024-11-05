@@ -1,5 +1,5 @@
 from evaluations.api.user_session_api import CreateUserSessionAPI, GetUserSessionAPI, GetAllUserSessionsOfVersionApi
-from evaluations.api.version_api import CreateVersionAPI, ListVersionsAPI, GetVersionAPI, GetVersionWidgetsAPI, DeleteVersionAPI, UpdateWidgetsSettingsAPI
+from evaluations.api.version_api import CreateVersionAPI, ListVersionsAPI, GetVersionAPI, GetVersionWidgetsAPI, DeleteVersionAPI, UpdateWidgetsSettingsAPI, RefreshUserInteractionEffortAPI
 from evaluations.api.evaluation_api import CreateEvaluationAPI, ListEvaluationsApi, GetEvaluationAPI, DeleteEvaluationAPI
 from django.urls import path
 
@@ -12,6 +12,7 @@ urlpatterns = [
     path('version/<int:id>/user_sessions', GetAllUserSessionsOfVersionApi.as_view()),
     path('version/<int:id>/widgets', GetVersionWidgetsAPI.as_view()),
     path('version/<int:id>/widgets/settings', UpdateWidgetsSettingsAPI.as_view()),
+    path('version/<int:id>/refresh_user_interaction_effort', RefreshUserInteractionEffortAPI.as_view()),
 
     path('evaluation/new', CreateEvaluationAPI.as_view()),
     path('evaluation', ListEvaluationsApi.as_view()),
