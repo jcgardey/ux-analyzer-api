@@ -4,10 +4,13 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from evaluations.models import Evaluation, Version
-from evaluations.serializers import VersionSerializer, WidgetSerializer
+from evaluations.serializers import VersionSerializer, WidgetSerializer, ExportVersionSerializer
+
+from evaluations.micro_measures_grabbers import TextInputGrabber, SelectInputGrabber, RadiosetGrabber, AnchorGrabber, DatepickerGrabber
 
 import random
 import string
+from datetime import timedelta, datetime
 
 class CreateVersionAPI(APIView):
     permission_classes = [IsAuthenticated]
@@ -61,9 +64,45 @@ class UpdateWidgetsSettingsAPI(APIView):
         return Response({'status': 'ok'}, status=status.HTTP_200_OK)
 
 class RefreshUserInteractionEffortAPI(APIView):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
         version = Version.objects.get(pk=id)
         version.calculate_user_interaction_effort()
         return Response(VersionSerializer(version).data)     
+
+
+class ExportVersionAPI(APIView):
+
+    def get(self, request, id):
+        version = Version.objects.get(pk=id)
+        return Response(ExportVersionSerializer(version).data)    
+
+
+class ImportVersionAPI(APIView):
+
+    grabbers = {
+        'TextInput': TextInputGrabber(),
+        'SelectInput': SelectInputGrabber(),
+        'RadioSet': RadiosetGrabber(),
+        'Anchor': AnchorGrabber(),
+        'Datepicker': DatepickerGrabber(),
+        'DateSelect': SelectInputGrabber()
+    }
+
+    def post(self, request, evaluation_id):
+        version = Evaluation.objects.get(pk=evaluation_id).versions.create(version_name=request.data['version_name'])
+        for session_data in request.data['user_sessions']:
+            hours, minutes, seconds = map(float, session_data['time'].split(':'))
+            t_delta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+            user_session = version.user_sessions.create(session_id=session_data['session_id'], 
+                                                        time=t_delta,
+                                                        date=datetime.strptime(session_data['date'], '%Y-%m-%dT%H:%M:%S.%fZ'))
+            valid_widget_logs = [ widget_log for widget_log in session_data['widget_logs'] if self.grabbers[widget_log['widget']['widget_type']].is_log_valid(widget_log['micro_measures']) ]
+            for widget_log in valid_widget_logs:
+                target_widget = version.get_widget(widget_log['widget']['url'], widget_log['widget']['xpath'], widget_log['widget']['widget_type'], widget_log['widget']['label'])
+                user_session.widget_logs.create(
+                    widget=target_widget,
+                    micro_measures= widget_log['micro_measures']
+                )
+        return Response({'result': 'ok'}, status=status.HTTP_201_CREATED)

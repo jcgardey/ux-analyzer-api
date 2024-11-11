@@ -62,3 +62,10 @@ class FullEvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evaluation
         fields = ('id', 'evaluation_name', 'versions')
+
+
+class ExportVersionSerializer(serializers.ModelSerializer):
+    user_sessions = UserSessionSerializer(many=True)
+    class Meta:
+        model = Version
+        fields = ('version_name', 'user_sessions', 'urls')
