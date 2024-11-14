@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from evaluations.models import Evaluation, Version
+from evaluations.models import Evaluation, Version, Widget
 from evaluations.serializers import VersionSerializer, WidgetSerializer, ExportVersionSerializer
 
 from evaluations.micro_measures_grabbers import TextInputGrabber, SelectInputGrabber, RadiosetGrabber, AnchorGrabber, DatepickerGrabber
@@ -106,3 +106,21 @@ class ImportVersionAPI(APIView):
                     micro_measures= widget_log['micro_measures']
                 )
         return Response({'result': 'ok'}, status=status.HTTP_201_CREATED)
+    
+
+class JoinWidgetsAPI(APIView):
+
+    def post(self, request, version_id):
+        version = Version.objects.get(pk=version_id)
+        if (request.data.get('widgetIds', None) is None or len(request.data['widgetIds']) == 0):
+            return Response({'result': 'invalid widgets'}, status=status.HTTP_401_BAD_REQUEST)
+            
+        first_widget = Widget.objects.get(pk=request.data['widgetIds'][0])
+        new_widget = version.widgets.create(label=first_widget.label, xpath=first_widget.xpath, url=first_widget.url, widget_type=first_widget.widget_type)
+        for widget_id in request.data['widgetIds']:
+            target = Widget.objects.get(pk=widget_id)
+            new_widget.logs.add(*target.logs.all())
+            target.delete()
+        new_widget.save()
+        return Response({'result': 'ok'}, status=status.HTTP_200_OK)
+
