@@ -10,7 +10,7 @@ class WidgetSerializer(serializers.ModelSerializer):
     user_interaction_effort = serializers.SerializerMethodField()
     class Meta:
         model = Widget
-        fields = ('id','widget_type', 'url', 'label', 'xpath', 'weight', 'user_interaction_effort')
+        fields = ('id','widget_type', 'url', 'label', 'xpath', 'weight', 'disabled', 'user_interaction_effort')
     
     def get_user_interaction_effort(self, widget):
         return round(widget.get_user_interaction_effort(), 1) if widget.get_user_interaction_effort() else None

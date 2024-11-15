@@ -48,7 +48,7 @@ class UserSession(models.Model):
     session_id = models.CharField(max_length=50)
     
     def get_user_interaction_effort(self):
-        valid_logs = list(filter(lambda w: w.has_user_interaction_effort(), self.widget_logs.all()))
+        valid_logs = list(filter(lambda log: not log.widget.disabled and log.has_user_interaction_effort(), self.widget_logs.all()))
         if len(valid_logs) == 0:
             return None
         predictions = np.array([ widget_log.get_user_interaction_effort() for widget_log in valid_logs ])
@@ -75,6 +75,7 @@ class Widget(models.Model):
     widget_type = models.CharField(max_length=255, choices=WIDGET_TYPES)
     url = models.URLField(max_length=255)
     weight = models.FloatField(default=1)
+    disabled = models.BooleanField(default=False)
 
     def get_user_interaction_effort(self):
         valid_logs = list(filter(lambda w: w.has_user_interaction_effort(), self.logs.all()))

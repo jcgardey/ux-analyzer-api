@@ -60,6 +60,7 @@ class UpdateWidgetsSettingsAPI(APIView):
             target_widget = version.widgets.get(pk=widget_data['id'])
             target_widget.weight = float(widget_data['weight'])
             target_widget.label = widget_data['label']
+            target_widget.disabled = widget_data['disabled']
             target_widget.save()
         return Response({'status': 'ok'}, status=status.HTTP_200_OK)
 
